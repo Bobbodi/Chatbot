@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>Knowledge Base Chatbot</h1>
+
+<div id="chat-box"></div>
+
+<div class="input-area">
+    <input
+        type="text"
+        id="user-input"
+        placeholder="Ask something..."
+    >
+
+    <button onclick="sendMessage()">
+        Send
+    </button>
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    const input =
+        document.getElementById("user-input");
+
+    const message = input.value;
+
+    if (!message) return;
+
+    const chatBox =
+        document.getElementById("chat-box");
+
+    chatBox.innerHTML +=
+        `<div class="user">
+            <b>You:</b> ${message}
+        </div>`;
+
+    input.value = "";
+
+    const response = await fetch("/chat", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            message: message
+        })
+    });
+
+    const data = await response.json();
+
+    chatBox.innerHTML +=
+        `<div class="bot">
+            <b>Bot:</b> ${data.response}
+        </div>`;
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
