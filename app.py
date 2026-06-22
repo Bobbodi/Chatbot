@@ -52,7 +52,12 @@ def chat():
             "role": "system",
             "content": """
             You are a knowledge-base assistant.
-            Use only the provided context to answer questions.
+            Answer using only the provided context. 
+            Formatting: 
+            - Be concise and direct.
+            - Use bullet points for lists. 
+            - Use bold for key terms.
+            If the answer is not in the context, say "I don't know".
             """
         },
         {

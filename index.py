@@ -1,11 +1,30 @@
 import chromadb
 import ollama
+import requests
+from bs4 import BeautifulSoup
+
+def chunk_text(text, chunk_size=1000):
+
+    chunks = []
+
+    for i in range(0, len(text), chunk_size):
+        chunks.append(text[i:i+chunk_size])
+
+    return chunks
+
+url = "https://www.mpa.gov.sg/home"
+
+response = requests.get(url)
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+text = soup.get_text(separator="\n")
 
 # Read knowledge file
 with open("knowledge.txt", "r", encoding="utf-8") as f:
-    text = f.read()
+    text += f.read()
 
-chunks = [chunk.strip() for chunk in text.split("\n\n")]
+chunks = chunk_text(text)
 
 db = chromadb.PersistentClient(path="./chroma_db")
 

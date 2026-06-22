@@ -52,7 +52,7 @@ body {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    height: 500px;
+    height: 400px;
     overflow-y: auto;
     padding: 16px;
     margin-bottom: 16px;
