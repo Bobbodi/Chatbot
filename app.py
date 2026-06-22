@@ -32,6 +32,17 @@ def chat():
         n_results=3
     )
 
+    documents = results["documents"][0]
+    distances = results["distances"][0]
+
+    sources = []
+
+    for doc, distance in zip(documents, distances):
+        sources.append({
+            "text": doc,
+            "distance": distance
+        })
+
     context = "\n".join(results["documents"][0])
 
     prompt = f"""
@@ -58,7 +69,8 @@ If the answer is not in the context, say:
     )
 
     return jsonify({
-        "response": response["message"]["content"]
+        "response": response["message"]["content"],
+        "sources": sources
     })
 
 

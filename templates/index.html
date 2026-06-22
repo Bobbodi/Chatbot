@@ -58,10 +58,34 @@ async function sendMessage() {
 
     const data = await response.json();
 
-    chatBox.innerHTML +=
-        `<div class="bot">
+    let sourceHtml = "";
+
+    for (const source of data.sources) {
+
+        sourceHtml += `
+            <div class="source-chunk">
+                <div>
+                    <b>Distance:</b>
+                    ${source.distance.toFixed(4)}
+                </div>
+
+                <div>
+                    ${source.text}
+                </div>
+            </div>
+        `;
+    }
+
+    chatBox.innerHTML += `
+        <div class="bot">
             <b>Bot:</b> ${data.response}
-        </div>`;
+
+            <details class="sources">
+                <summary>Retrieved Chunks</summary>
+                ${sourceHtml}
+            </details>
+        </div>
+    `;
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
