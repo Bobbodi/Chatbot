@@ -6,20 +6,26 @@
 </head>
 <body>
 
-<h1>Knowledge Base Chatbot</h1>
+<div class="app">
 
-<div id="chat-box"></div>
+    <header class="app-header">
+        <h1>Chatbot</h1>
+    </header>
 
-<div class="input-area">
-    <input
-        type="text"
-        id="user-input"
-        placeholder="Ask something..."
-    >
+    <div id="chat-box"></div>
 
-    <button onclick="sendMessage()">
-        Send
-    </button>
+    <div class="input-area">
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Ask something..."
+        >
+
+        <button id="send-btn" onclick="sendMessage()">
+            Send
+        </button>
+    </div>
+
 </div>
 
 <script>
@@ -29,7 +35,7 @@ async function sendMessage() {
     const input =
         document.getElementById("user-input");
 
-    const message = input.value;
+    const message = input.value.trim();
 
     if (!message) return;
 
@@ -37,59 +43,96 @@ async function sendMessage() {
         document.getElementById("chat-box");
 
     chatBox.innerHTML +=
-        `<div class="user">
-            <b>You:</b> ${message}
+        `<div class="message user">
+            <div class="bubble">${message}</div>
         </div>`;
 
     input.value = "";
+    input.disabled = true;
+    document.getElementById("send-btn").disabled = true;
 
-    const response = await fetch("/chat", {
+    // Show "thinking" indicator with animated dots
+    const thinkingId = "thinking-" + Date.now();
+    chatBox.innerHTML += `
+        <div class="message bot" id="${thinkingId}">
+            <div class="bubble thinking">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+    `;
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-        method: "POST",
+    try {
+        const response = await fetch("/chat", {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+            method: "POST",
 
-        body: JSON.stringify({
-            message: message
-        })
-    });
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    const data = await response.json();
+            body: JSON.stringify({
+                message: message
+            })
+        });
 
-    let sourceHtml = "";
+        const data = await response.json();
 
-    for (const source of data.sources) {
+        let sourceHtml = "";
 
-        sourceHtml += `
-            <div class="source-chunk">
-                <div>
-                    <b>Distance:</b>
-                    ${source.distance.toFixed(4)}
+        for (const source of data.sources) {
+
+            sourceHtml += `
+                <div class="source-chunk">
+                    <div class="source-distance">
+                        <b>Distance:</b>
+                        ${source.distance.toFixed(4)}
+                    </div>
+
+                    <div class="source-text">
+                        ${source.text}
+                    </div>
                 </div>
+            `;
+        }
 
-                <div>
-                    ${source.text}
+        // Replace thinking indicator with the actual response
+        document.getElementById(thinkingId).outerHTML = `
+            <div class="message bot">
+                <div class="bubble">
+                    ${data.response}
+
+                    <details class="sources">
+                        <summary>Retrieved Chunks</summary>
+                        ${sourceHtml}
+                    </details>
                 </div>
             </div>
         `;
+
+    } catch (err) {
+        document.getElementById(thinkingId).outerHTML = `
+            <div class="message bot">
+                <div class="bubble error">
+                    Something went wrong. Please try again.
+                </div>
+            </div>
+        `;
+    } finally {
+        input.disabled = false;
+        document.getElementById("send-btn").disabled = false;
+        input.focus();
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
-
-    chatBox.innerHTML += `
-        <div class="bot">
-            <b>Bot:</b> ${data.response}
-
-            <details class="sources">
-                <summary>Retrieved Chunks</summary>
-                ${sourceHtml}
-            </details>
-        </div>
-    `;
-
-    chatBox.scrollTop =
-        chatBox.scrollHeight;
 }
+
+document.getElementById("user-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
 
 </script>
 

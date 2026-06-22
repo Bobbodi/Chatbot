@@ -1,28 +1,190 @@
-body {
-    font-family: Arial, sans-serif;
-    width: 800px;
-    margin: auto;
-    padding-top: 30px;
+:root {
+    --bg: #0f1115;
+    --panel: #181b21;
+    --panel-alt: #1f232b;
+    --border: #2a2e37;
+    --text: #e6e8eb;
+    --text-dim: #9aa0aa;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --user-bubble: #2563eb;
+    --bot-bubble: #232730;
+    --error: #ef4444;
 }
 
-#chat-box {
-    border: 1px solid #ccc;
-    height: 500px;
-    overflow-y: auto;
-    padding: 10px;
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.app {
+    width: 800px;
+    max-width: 95vw;
+    margin: 0 auto;
+    padding: 30px 0 40px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-header {
     margin-bottom: 20px;
 }
 
-.user {
-    margin: 10px 0;
-    text-align: right;
+.app-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
 }
 
-.bot {
-    margin: 10px 0;
-    text-align: left;
+#chat-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    height: 500px;
+    overflow-y: auto;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+#chat-box::-webkit-scrollbar {
+    width: 8px;
+}
+
+#chat-box::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 8px;
+}
+
+.message {
+    display: flex;
+    width: 100%;
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.message.bot {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    line-height: 1.45;
+    font-size: 14.5px;
+    word-wrap: break-word;
+}
+
+.message.user .bubble {
+    background: var(--user-bubble);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.message.bot .bubble {
+    background: var(--bot-bubble);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.bubble.error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid var(--error);
+    color: #fca5a5;
+}
+
+/* Thinking indicator */
+.bubble.thinking {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 16px;
+}
+
+.bubble.thinking .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.4;
+    animation: dot-pulse 1.2s infinite ease-in-out;
+}
+
+.bubble.thinking .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.bubble.thinking .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.85);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* Sources / retrieved chunks */
+.sources {
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+.sources summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+}
+
+.sources summary:hover {
+    color: var(--accent-hover);
+}
+
+.source-chunk {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.source-distance {
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+
+.source-text {
+    color: var(--text);
+}
+
+/* Input area */
 .input-area {
     display: flex;
     gap: 10px;
@@ -30,9 +192,45 @@ body {
 
 input {
     flex: 1;
-    padding: 10px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14.5px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+input::placeholder {
+    color: var(--text-dim);
+}
+
+input:focus {
+    border-color: var(--accent);
+}
+
+input:disabled {
+    opacity: 0.6;
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

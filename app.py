@@ -45,28 +45,31 @@ def chat():
 
     context = "\n".join(results["documents"][0])
 
-    prompt = f"""
-Use ONLY the provided context.
-
-Context:
-{context}
-
-Question:
-{user_message}
-
-If the answer is not in the context, say:
-"I don't know based on the provided knowledge."
-"""
-
     response = ollama.chat(
-        model="qwen2:0.5b",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
+    model="llama3.2",
+    messages=[
+        {
+            "role": "system",
+            "content": """
+            You are a knowledge-base assistant.
+            Use only the provided context to answer questions.
+            """
+        },
+        {
+            "role": "user",
+            "content": f"""
+            Context:
+            {context}
+
+            Question:
+            {user_message}
+            """
+        }
+    ],
+    options={
+        "temperature": 0.1
+    }
+)
 
     return jsonify({
         "response": response["message"]["content"],
