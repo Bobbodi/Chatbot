@@ -1,15 +1,17 @@
 :root {
-    --bg: #0f1115;
-    --panel: #181b21;
-    --panel-alt: #1f232b;
-    --border: #2a2e37;
-    --text: #e6e8eb;
-    --text-dim: #9aa0aa;
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --panel-alt: #f7f7f8;
+    --border: #e5e5e8;
+    --text: #1f2023;
+    --text-dim: #8e8ea0;
     --accent: #3b82f6;
     --accent-hover: #2563eb;
-    --user-bubble: #2563eb;
-    --bot-bubble: #232730;
-    --error: #ef4444;
+    --user-bubble: #ffffff;
+    --bot-bubble: #ffffff;
+    --error: #d1453b;
+    --avatar-user-bg: #1f2023;
+    --avatar-bot-bg: #3b82f6;
 }
 
 * {
@@ -17,7 +19,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
     margin: 0;
@@ -40,7 +42,7 @@ body {
 }
 
 .app-header h1 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text);
     margin: 0;
@@ -52,13 +54,13 @@ body {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    height: 400px;
+    height: 460px;
     overflow-y: auto;
-    padding: 16px;
+    padding: 20px 16px;
     margin-bottom: 16px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 22px;
 }
 
 #chat-box::-webkit-scrollbar {
@@ -73,42 +75,57 @@ body {
 .message {
     display: flex;
     width: 100%;
+    gap: 12px;
+    align-items: flex-start;
 }
 
 .message.user {
-    justify-content: flex-end;
+    flex-direction: row-reverse;
 }
 
 .message.bot {
-    justify-content: flex-start;
+    flex-direction: row;
 }
 
 .bubble {
     max-width: 75%;
     padding: 10px 14px;
     border-radius: 14px;
-    line-height: 1.45;
-    font-size: 14.5px;
+    line-height: 1.55;
+    font-size: 15px;
     word-wrap: break-word;
 }
 
 .message.user .bubble {
     background: var(--user-bubble);
-    color: #fff;
-    border-bottom-right-radius: 4px;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.message.bot .bubble.thinking {
+    border: none;
+    background: transparent;
+    box-shadow: none;
 }
 
 .message.bot .bubble {
     background: var(--bot-bubble);
     color: var(--text);
-    border-bottom-left-radius: 4px;
     border: 1px solid var(--border);
 }
 
+.bubble p {
+    margin: 0 0 8px;
+}
+
+.bubble p:last-child {
+    margin-bottom: 0;
+}
+
 .bubble.error {
-    background: rgba(239, 68, 68, 0.12);
+    background: rgba(209, 69, 59, 0.08);
     border: 1px solid var(--error);
-    color: #fca5a5;
+    color: var(--error);
 }
 
 /* Thinking indicator */
@@ -116,7 +133,9 @@ body {
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: 14px 16px;
+    padding: 10px 0;
+    margin-top: 10px;
+    margin-left: 5px;
 }
 
 .bubble.thinking .dot {
@@ -124,7 +143,7 @@ body {
     height: 7px;
     border-radius: 50%;
     background: var(--accent);
-    opacity: 0.4;
+    opacity: 0.5;
     animation: dot-pulse 1.2s infinite ease-in-out;
 }
 
@@ -199,7 +218,7 @@ input {
     color: var(--text);
     font-size: 14.5px;
     outline: none;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input::placeholder {
@@ -208,6 +227,7 @@ input::placeholder {
 
 input:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
 }
 
 input:disabled {

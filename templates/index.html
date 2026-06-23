@@ -3,6 +3,7 @@
 <head>
     <title>Chatbot</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -21,7 +22,7 @@
             placeholder="Ask something..."
         >
 
-        <button id="send-btn" onclick="sendMessage()">
+        <button id="send-btn">
             Send
         </button>
     </div>
@@ -29,113 +30,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<script>
-async function sendMessage() {
-
-    const input =
-        document.getElementById("user-input");
-
-    const message = input.value.trim();
-
-    if (!message) return;
-
-    const chatBox =
-        document.getElementById("chat-box");
-
-    chatBox.innerHTML +=
-        `<div class="message user">
-            <div class="bubble">${message}</div>
-        </div>`;
-
-    input.value = "";
-    input.disabled = true;
-    document.getElementById("send-btn").disabled = true;
-
-    // Show "thinking" indicator with animated dots
-    const thinkingId = "thinking-" + Date.now();
-    chatBox.innerHTML += `
-        <div class="message bot" id="${thinkingId}">
-            <div class="bubble thinking">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </div>
-        </div>
-    `;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-        const response = await fetch("/chat", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                message: message
-            })
-        });
-
-        const data = await response.json();
-
-        let sourceHtml = "";
-
-        for (const source of data.sources) {
-
-            sourceHtml += `
-                <div class="source-chunk">
-                    <div class="source-distance">
-                        <b>Distance:</b>
-                        ${source.distance.toFixed(4)}
-                    </div>
-
-                    <div class="source-text">
-                        ${source.text}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Replace thinking indicator with the actual response
-        document.getElementById(thinkingId).outerHTML = `
-            <div class="message bot">
-                <div class="bubble">
-                    ${marked.parse(data.response)}
-
-                    <details class="sources">
-                        <summary>Retrieved Chunks</summary>
-                        ${sourceHtml}
-                    </details>
-                </div>
-            </div>
-        `;
-
-    } catch (err) {
-        document.getElementById(thinkingId).outerHTML = `
-            <div class="message bot">
-                <div class="bubble error">
-                    Something went wrong. Please try again.
-                </div>
-            </div>
-        `;
-    } finally {
-        input.disabled = false;
-        document.getElementById("send-btn").disabled = false;
-        input.focus();
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-}
-
-document.getElementById("user-input").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
-
-</script>
+<script src="/static/chat.js"></script>
 
 </body>
 </html>

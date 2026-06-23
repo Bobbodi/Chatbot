@@ -57,7 +57,7 @@ def chat():
             - Be concise and direct.
             - Use bullet points for lists. 
             - Use bold for key terms.
-            If the answer is not in the context, say "I don't know".
+            If the answer is not in the context, do not make up information and say "I don't know".
             """
         },
         {
