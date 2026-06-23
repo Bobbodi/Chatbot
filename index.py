@@ -3,30 +3,28 @@ import ollama
 import requests
 from bs4 import BeautifulSoup
 import time
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-def chunk_text(text, chunk_size=1000):
-
-    chunks = []
-
-    for i in range(0, len(text), chunk_size):
-        chunks.append(text[i:i+chunk_size])
-
-    return chunks
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 start_time = time.time()
-url = "https://www.mpa.gov.sg/home"
+urls = ["https://www.mpa.gov.sg/home",
+         "https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values"]   
 
-response = requests.get(url)
+all_text = ""
+for url in urls: 
 
-soup = BeautifulSoup(response.text, "html.parser")
+    response = requests.get(url)
 
-text = soup.get_text(separator="\n")
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    all_text += soup.get_text(separator="\n")
 
 # Read knowledge file
 with open("knowledge.txt", "r", encoding="utf-8") as f:
-    text += f.read()
+    all_text += f.read()
 
-chunks = chunk_text(text)
+chunks = splitter.split_text(all_text)
 
 db = chromadb.PersistentClient(path="./chroma_db")
 
