@@ -89,6 +89,8 @@ async function sendMessage() {
             `;
         }
 
+        const times = data.times;
+
         // Replace thinking indicator with the actual response
         document.getElementById(thinkingId).outerHTML = `
             <div class="message bot">
@@ -99,6 +101,13 @@ async function sendMessage() {
                     <details class="sources">
                         <summary>Retrieved Chunks</summary>
                         ${sourceHtml}
+                    </details>
+
+                    <details class="sources">
+                        <summary>Time Statistics</summary>
+                        <div> Embedding Time: ${times.embed}s </div>
+                        <div> Retrieval Time: ${times.retrieval}s </div>
+                        <div> LLM Time: ${times.llm}s </div>
                     </details>
                 </div>
             </div>

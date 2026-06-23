@@ -2,6 +2,7 @@ import chromadb
 import ollama
 import requests
 from bs4 import BeautifulSoup
+import time
 
 def chunk_text(text, chunk_size=1000):
 
@@ -12,6 +13,7 @@ def chunk_text(text, chunk_size=1000):
 
     return chunks
 
+start_time = time.time()
 url = "https://www.mpa.gov.sg/home"
 
 response = requests.get(url)
@@ -47,5 +49,6 @@ for i, chunk in enumerate(chunks):
         documents=[chunk],
         embeddings=[embedding["embeddings"][0]]
     )
-
+end_time = time.time() - start_time
 print("Knowledge base indexed successfully.")
+print("Time taken: {:.2f} s".format(end_time))
