@@ -8,8 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 start_time = time.time()
-urls = ["https://www.mpa.gov.sg/home",
-         "https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values"]   
+urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values"]   
 
 all_text = ""
 for url in urls: 
@@ -18,14 +17,17 @@ for url in urls:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    all_text += soup.get_text(separator="\n")
+    article = soup.find("article")
+
+    all_text += article.get_text("\n", strip=True)
+
 
 # Read knowledge file
 with open("knowledge.txt", "r", encoding="utf-8") as f:
     all_text += f.read()
 
 chunks = splitter.split_text(all_text)
-
+print(all_text)
 db = chromadb.PersistentClient(path="./chroma_db")
 
 try:

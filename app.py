@@ -33,7 +33,7 @@ def chat():
         query_embeddings=[
             embedding["embeddings"][0]
         ],
-        n_results=3
+        n_results=10
     )
     retrieval_time = time.time() - retrieval_start
 
