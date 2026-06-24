@@ -2,12 +2,16 @@ from flask import Flask, render_template, request, jsonify
 import chromadb
 import ollama
 import time
+from sentence_transformers import CrossEncoder
 
 app = Flask(__name__)
 
 db = chromadb.PersistentClient(path="./chroma_db")
 collection = db.get_collection("knowledge")
 
+reranker = CrossEncoder(
+    "BAAI/bge-reranker-base"
+)
 
 @app.route("/")
 def home():
@@ -30,25 +34,42 @@ def chat():
     retrieval_start = time.time()
     # Retrieve relevant documents
     results = collection.query(
-        query_embeddings=[
-            embedding["embeddings"][0]
-        ],
+        query_embeddings=[embedding["embeddings"][0]],
         n_results=10
     )
-    retrieval_time = time.time() - retrieval_start
 
     documents = results["documents"][0]
     distances = results["distances"][0]
 
-    sources = []
+    pairs = [
+        (user_message, doc)
+        for doc in documents
+    ]
 
-    for doc, distance in zip(documents, distances):
-        sources.append({
+    scores = reranker.predict(pairs)
+
+    reranked = sorted(
+        zip(documents, distances, scores),
+        key=lambda x: x[2],
+        reverse=True
+    )
+
+    top_results = reranked[:3]
+
+    context = "\n".join(
+        doc
+        for doc, _, _ in top_results
+    )
+
+    sources = [
+        {
             "text": doc,
-            "distance": distance
-        })
-
-    context = "\n".join(results["documents"][0])
+            "distance": float(distance),
+            "rerank_score": float(score)
+        }
+        for doc, distance, score in top_results
+    ]
+    retrieval_time = time.time() - retrieval_start
 
     llm_start = time.time()
     response = ollama.chat(
