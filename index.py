@@ -4,23 +4,27 @@ import requests
 from bs4 import BeautifulSoup
 import time
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from trafilatura import fetch_url, extract
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 start_time = time.time()
-urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values"]   
+urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values", 
+         "https://www.mpa.gov.sg/who-we-are/about-mpa/board-members", 
+         "https://www.mpa.gov.sg/maritime-singapore/industry-transformation"]   
 
 all_text = ""
 for url in urls: 
+    downloaded = fetch_url(url)
+    all_text += extract(downloaded, include_images=True, include_links=True, include_formatting=True)
 
-    response = requests.get(url)
+#     response = requests.get(url)
 
-    soup = BeautifulSoup(response.text, "html.parser")
+#     soup = BeautifulSoup(response.text, "html.parser")
 
-    article = soup.find("article")
+#     article = soup.find("article")
 
-    all_text += article.get_text("\n", strip=True)
-
+#     all_text += article.get_text("\n", strip=True)
 
 # Read knowledge file
 with open("knowledge.txt", "r", encoding="utf-8") as f:

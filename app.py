@@ -61,7 +61,7 @@ def chat():
                 Answer using only the provided context. 
                 Formatting: 
                 - Be concise and direct.
-                - Use bullet points for lists. 
+                - Use numbers for lists. 
                 - Use bold for key terms.
                 If the answer is not in the context, do not make up information and say "I don't know".
                 """
