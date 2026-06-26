@@ -5,18 +5,21 @@ from bs4 import BeautifulSoup
 import time
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from trafilatura import fetch_url, extract
+from paddleocr import PPStructureV3
+from pathlib import Path
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 start_time = time.time()
-urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values", 
-         "https://www.mpa.gov.sg/who-we-are/about-mpa/board-members", 
-         "https://www.mpa.gov.sg/maritime-singapore/industry-transformation"]   
+# urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values", 
+#          "https://www.mpa.gov.sg/who-we-are/about-mpa/board-members", 
+#          "https://www.mpa.gov.sg/maritime-singapore/industry-transformation",
+#          "https://www.mpa.gov.sg/finance-e-services/tariff-fees-and-charges/ocean-going-vessels/port-dues-tariff"]   
 
 all_text = ""
-for url in urls: 
-    downloaded = fetch_url(url)
-    all_text += extract(downloaded, include_images=True, include_links=True, include_formatting=True)
+# for url in urls: 
+#     downloaded = fetch_url(url)
+#     all_text += extract(downloaded, include_images=True, include_links=True, include_formatting=True)
 
 #     response = requests.get(url)
 
@@ -26,12 +29,38 @@ for url in urls:
 
 #     all_text += article.get_text("\n", strip=True)
 
+
+pdfs = ["Page2.pdf"]
+for pdf in pdfs: 
+    input_file = pdf
+    output_path = Path("./page2_output")
+    pipeline = PPStructureV3()
+    output = pipeline.predict(input=input_file, text_recognition_model_name="en_PP-OCRv4_mobile_rec")
+    markdown_list = []
+    markdown_images = []
+    for res in output: 
+        md_info = res.markdown
+        markdown_list.append(md_info)
+        markdown_images.append(md_info.get("markdown_images", {}))
+    markdown_texts = pipeline.concatenate_markdown_pages(markdown_list)
+    mkd_file_path = output_path / f"{Path(input_file).stem}.md"
+    mkd_file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(mkd_file_path, "w", encoding="utf-8") as f:
+        f.write(markdown_texts["markdown_texts"])
+        all_text += markdown_texts["markdown_texts"]
+    for item in markdown_images: 
+        if item: 
+            for path, image in item.items(): 
+                file_path = output_path / path
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                image.save(file_path)
+
 # Read knowledge file
 with open("knowledge.txt", "r", encoding="utf-8") as f:
     all_text += f.read()
 
 chunks = splitter.split_text(all_text)
-print(all_text)
+
 db = chromadb.PersistentClient(path="./chroma_db")
 
 try:

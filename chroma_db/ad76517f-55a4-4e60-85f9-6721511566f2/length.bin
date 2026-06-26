@@ -1,0 +1,16 @@
+   # XXX the correct long-term fix. See issue 23060
+            #assert _winapi.GetLastError() == _winapi.ERROR_ALREADY_EXISTS
+
+else:
+
+    class Arena(object):
+        """
+        A shared memory area backed by a temporary file (POSIX).
+        """
+
+        if sys.platform == 'linux':
+            _dir_candidates = ['/dev/shm']
+        else:
+            _dir_candidates = []
+
+        
