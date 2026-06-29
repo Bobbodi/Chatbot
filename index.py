@@ -3,12 +3,10 @@ import ollama
 import requests
 from bs4 import BeautifulSoup
 import time
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from trafilatura import fetch_url, extract
 from paddleocr import PPStructureV3
 from pathlib import Path
-
-splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 start_time = time.time()
 # urls = ["https://www.mpa.gov.sg/who-we-are/about-mpa/mission-vision-values", 
@@ -30,7 +28,7 @@ all_text = ""
 #     all_text += article.get_text("\n", strip=True)
 
 
-pdfs = ["Page2.pdf"]
+pdfs = []
 for pdf in pdfs: 
     input_file = pdf
     output_path = Path("./page2_output")
@@ -56,10 +54,25 @@ for pdf in pdfs:
                 image.save(file_path)
 
 # Read knowledge file
-with open("knowledge.txt", "r", encoding="utf-8") as f:
+with open("OSCP.md", "r", encoding="utf-8") as f:
     all_text += f.read()
 
-chunks = splitter.split_text(all_text)
+headers_to_split_on = [
+    ("#", "Header 1"),
+    ("##", "Header 2"),
+    ("###", "Header 3"),
+]
+markdown_splitter = MarkdownHeaderTextSplitter(
+    headers_to_split_on=headers_to_split_on,
+    strip_headers=False
+)
+md_header_splits = markdown_splitter.split_text(all_text)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200
+)
+
+chunks = text_splitter.split_documents(md_header_splits)
 
 db = chromadb.PersistentClient(path="./chroma_db")
 
@@ -74,13 +87,14 @@ for i, chunk in enumerate(chunks):
 
     embedding = ollama.embed(
         model="nomic-embed-text",
-        input=chunk
+        input=chunk.page_content
     )
 
     collection.add(
         ids=[str(i)],
-        documents=[chunk],
-        embeddings=[embedding["embeddings"][0]]
+        documents=[chunk.page_content],
+        embeddings=[embedding["embeddings"][0]],
+        metadatas=[chunk.metadata]
     )
 end_time = time.time() - start_time
 print("Knowledge base indexed successfully.")
